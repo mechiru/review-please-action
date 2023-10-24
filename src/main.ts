@@ -1,26 +1,52 @@
 import * as core from '@actions/core'
-import { wait } from './wait'
+import { Client, PrReviewer } from './github'
 
-/**
- * The main function for the action.
- * @returns {Promise<void>} Resolves when the action is complete.
- */
+type Input = Readonly<{
+  auth: string
+  owner: string
+  repo: string
+}>
+
+function parseInput(init?: Partial<Input>): Input {
+  return {
+    auth: core.getInput('github-token'),
+    owner: core.getInput('owner'),
+    repo: core.getInput('repo')
+  }
+}
+
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
+    const input = parseInput()
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    const client = new Client(input)
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    const prs = await client.getPrReviewers()
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+    for (const pr of prs) {
+      const comment = toComment(input.owner, pr)
+      await client.createIssueComment(pr.no, comment)
+    }
+
+    core.setOutput('prs', JSON.stringify(prs))
   } catch (error) {
-    // Fail the workflow run if an error occurs
-    if (error instanceof Error) core.setFailed(error.message)
+    if (error instanceof Error) {
+      core.setFailed(error.message)
+    }
   }
+}
+
+export function toComment(owner: string, pr: PrReviewer): string {
+  const reviewerLogins = pr.reviewerLogins.map(x => `@${x}`).join(', ')
+  const reviewerTeams =
+    pr.reviewerTeamSlugs.map(x => `${owner}/${x}`).join(', ') ?? ''
+
+  return `${reviewerLogins.length > 0 ? 'Requested reviewers:' : ''}
+${reviewerLogins}
+
+${reviewerTeams.length > 0 ? 'Requested teams:' : ''}
+${reviewerTeams}
+
+url: ${pr.url}
+Please review!!`
 }
