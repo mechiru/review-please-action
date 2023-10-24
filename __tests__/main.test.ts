@@ -2,15 +2,15 @@
  * Unit tests for src/main.ts
  */
 
-import { PrReviewer } from '../src/github'
-import { toComment } from '../src/main'
-import { expect } from '@jest/globals'
+import { PrReviewer } from '../src/github';
+import { toComment } from '../src/main';
+import { expect } from '@jest/globals';
 
 describe('main.ts', () => {
   it('toComment', () => {
     const cases: {
-      in: { owner: string; pr: PrReviewer }
-      want: string
+      in: { owner: string; pr: PrReviewer };
+      want: string;
     }[] = [
       {
         in: {
@@ -76,10 +76,10 @@ Requested teams:
 url: my-url4
 Please review!!`
       }
-    ]
+    ];
 
     cases.forEach(x => {
-      expect(toComment(x.in.owner, x.in.pr)).toBe(x.want)
-    })
-  })
-})
+      expect(toComment(x.in.owner, x.in.pr)).toBe(x.want);
+    });
+  });
+});
