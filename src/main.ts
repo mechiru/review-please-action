@@ -38,15 +38,10 @@ export async function run(): Promise<void> {
 
 export function toComment(owner: string, pr: PrReviewer): string {
   const reviewerLogins = pr.reviewerLogins.map(x => `@${x}`).join(', ')
-  const reviewerTeams =
-    pr.reviewerTeamSlugs.map(x => `${owner}/${x}`).join(', ') ?? ''
+  const reviewerTeams = pr.reviewerTeamSlugs.map(x => `@${owner}/${x}`).join(', ') ?? ''
 
-  return `${reviewerLogins.length > 0 ? 'Requested reviewers:' : ''}
-${reviewerLogins}
-
-${reviewerTeams.length > 0 ? 'Requested teams:' : ''}
-${reviewerTeams}
-
+  return `${reviewerLogins.length > 0 ? `Requested reviewers:\n${reviewerLogins}\n\n` : ''}\
+${reviewerTeams.length > 0 ? `Requested teams:\n${reviewerTeams}\n\n` : ''}\
 url: ${pr.url}
 Please review!!`
 }

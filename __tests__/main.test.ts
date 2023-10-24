@@ -1,80 +1,85 @@
 /**
- * Unit tests for the action's main functionality, src/main.ts
- *
- * These should be run as if the action was called from a workflow.
- * Specifically, the inputs listed in `action.yml` should be set as environment
- * variables following the pattern `INPUT_<INPUT_NAME>`.
+ * Unit tests for src/main.ts
  */
 
-import * as core from '@actions/core'
-import * as main from '../src/main'
+import { PrReviewer } from '../src/github'
+import { toComment } from '../src/main'
+import { expect } from '@jest/globals'
 
-// Mock the GitHub Actions core library
-const debugMock = jest.spyOn(core, 'debug')
-const getInputMock = jest.spyOn(core, 'getInput')
-const setFailedMock = jest.spyOn(core, 'setFailed')
-const setOutputMock = jest.spyOn(core, 'setOutput')
+describe('main.ts', () => {
+  it('toComment', () => {
+    const cases: {
+      in: { owner: string; pr: PrReviewer }
+      want: string
+    }[] = [
+      {
+        in: {
+          owner: 'my-org',
+          pr: {
+            url: 'my-url',
+            no: 0,
+            reviewerLogins: [],
+            reviewerTeamSlugs: []
+          }
+        },
+        want: `url: my-url
+Please review!!`
+      },
+      {
+        in: {
+          owner: 'my-org2',
+          pr: {
+            url: 'my-url2',
+            no: 123,
+            reviewerLogins: ['login1'],
+            reviewerTeamSlugs: []
+          }
+        },
+        want: `Requested reviewers:
+@login1
 
-// Mock the action's main function
-const runMock = jest.spyOn(main, 'run')
+url: my-url2
+Please review!!`
+      },
+      {
+        in: {
+          owner: 'my-org3',
+          pr: {
+            url: 'my-url3',
+            no: 123,
+            reviewerLogins: [],
+            reviewerTeamSlugs: ['team-slug1']
+          }
+        },
+        want: `Requested teams:
+@my-org3/team-slug1
 
-// Other utilities
-const timeRegex = /^\d{2}:\d{2}:\d{2}/
+url: my-url3
+Please review!!`
+      },
+      {
+        in: {
+          owner: 'my-org4',
+          pr: {
+            url: 'my-url4',
+            no: 123,
+            reviewerLogins: ['login4', 'login5'],
+            reviewerTeamSlugs: ['team-slug1', 'team-slug2']
+          }
+        },
+        want: `Requested reviewers:
+@login4, @login5
 
-describe('action', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
+Requested teams:
+@my-org4/team-slug1, @my-org4/team-slug2
 
-  it('sets the time output', async () => {
-    // Set the action's inputs as return values from core.getInput()
-    getInputMock.mockImplementation((name: string): string => {
-      switch (name) {
-        case 'milliseconds':
-          return '500'
-        default:
-          return ''
+url: my-url4
+Please review!!`
       }
+    ]
+
+    cases.forEach(x => {
+      expect(toComment(x.in.owner, x.in.pr)).toBe(x.want)
     })
-
-    await main.run()
-    expect(runMock).toHaveReturned()
-
-    // Verify that all of the core library functions were called correctly
-    expect(debugMock).toHaveBeenNthCalledWith(1, 'Waiting 500 milliseconds ...')
-    expect(debugMock).toHaveBeenNthCalledWith(
-      2,
-      expect.stringMatching(timeRegex)
-    )
-    expect(debugMock).toHaveBeenNthCalledWith(
-      3,
-      expect.stringMatching(timeRegex)
-    )
-    expect(setOutputMock).toHaveBeenNthCalledWith(
-      1,
-      'time',
-      expect.stringMatching(timeRegex)
-    )
-  })
-
-  it('sets a failed status', async () => {
-    // Set the action's inputs as return values from core.getInput()
-    getInputMock.mockImplementation((name: string): string => {
-      switch (name) {
-        case 'milliseconds':
-          return 'this is not a number'
-        default:
-          return ''
-      }
-    })
-
-    await main.run()
-    expect(runMock).toHaveReturned()
-
-    // Verify that all of the core library functions were called correctly
-    expect(setFailedMock).toHaveBeenNthCalledWith(
-      1,
-      'milliseconds not a number'
-    )
   })
 })
