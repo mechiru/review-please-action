@@ -8592,10 +8592,11 @@ exports.toComment = exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(978);
 function parseInput(init) {
+    const [owner, repo] = core.getInput('repo').split('/');
     return {
         auth: core.getInput('github-token'),
-        owner: core.getInput('owner'),
-        repo: core.getInput('repo')
+        owner,
+        repo
     };
 }
 async function run() {
