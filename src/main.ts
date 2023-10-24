@@ -24,6 +24,7 @@ export async function run(): Promise<void> {
     const prs = await client.getPrReviewers();
 
     for (const pr of prs) {
+      core.info(`pr: ${JSON.stringify(pr)}`);
       const comment = toComment(input.owner, pr);
       await client.createIssueComment(pr.no, comment);
     }
