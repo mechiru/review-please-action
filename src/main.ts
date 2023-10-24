@@ -8,10 +8,11 @@ type Input = Readonly<{
 }>;
 
 function parseInput(init?: Partial<Input>): Input {
+  const [owner, repo] = core.getInput('repo').split('/');
   return {
     auth: core.getInput('github-token'),
-    owner: core.getInput('owner'),
-    repo: core.getInput('repo')
+    owner,
+    repo
   };
 }
 

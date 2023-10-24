@@ -1,18 +1,18 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: Release Please
+description: Get a list of pull requests and send messages to reviewers for each PR.
+author: mechiru
 
-# Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
-    required: true
-    default: '1000'
+  github-token:
+    description: GitHub API token
+    default: ${{ github.token }}
+  repo:
+    description: Target repository. Format is `owner/repo_name`.
+    default: ${{ github.repository }}
 
-# Define your outputs here.
 outputs:
-  time:
-    description: 'Your output description here'
+  prs:
+    description: Pull Request information
 
 runs:
   using: node20
