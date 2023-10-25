@@ -8591,7 +8591,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.toComment = exports.checkPrState = exports.parsePeriod = exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(978);
-function parseInput(init) {
+function parseInput() {
     const [owner, repo] = core.getInput('repo').split('/');
     const deadline = parseInt(core.getInput('review-deadline'));
     return {
