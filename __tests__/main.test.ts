@@ -3,10 +3,139 @@
  */
 
 import { PrReviewer } from '../src/github';
-import { toComment } from '../src/main';
+import { checkPrState, parsePeriod, toComment } from '../src/main';
 import { expect } from '@jest/globals';
 
 describe('main.ts', () => {
+  it('parsePeriod', () => {
+    const cases: {
+      in: string;
+      want: number;
+      error: boolean;
+    }[] = [
+      {
+        in: '6d',
+        want: 6,
+        error: false
+      },
+      {
+        in: '1d',
+        want: 1,
+        error: false
+      },
+      {
+        in: '1',
+        want: 0,
+        error: true
+      }
+    ];
+
+    cases.forEach(x => {
+      if (x.error) {
+        expect(() => parsePeriod(x.in)).toThrowError();
+      } else {
+        expect(parsePeriod(x.in)).toEqual(x.want);
+      }
+    });
+  });
+
+  it('checkPrState', () => {
+    const cases: {
+      name: string;
+      in: {
+        pr: PrReviewer;
+        now: Date;
+        deadline: number;
+      };
+      want: boolean;
+    }[] = [
+      {
+        name: 'ok',
+        in: {
+          pr: {
+            url: 'my-url',
+            no: 0,
+            draft: false,
+            reviewerLogins: ['test'],
+            reviewerTeamSlugs: [],
+            createdAt: '2023-10-10T01:30:57Z'
+          },
+          now: new Date('2023-10-25T01:30:57Z'),
+          deadline: 6
+        },
+        want: true
+      },
+      {
+        name: 'ok',
+        in: {
+          pr: {
+            url: 'my-url',
+            no: 0,
+            draft: false,
+            reviewerLogins: [],
+            reviewerTeamSlugs: ['test'],
+            createdAt: '2023-10-10T01:30:57Z'
+          },
+          now: new Date('2023-10-25T01:30:57Z'),
+          deadline: 6
+        },
+        want: true
+      },
+      {
+        name: 'empty reviewers',
+        in: {
+          pr: {
+            url: 'my-url',
+            no: 0,
+            draft: false,
+            reviewerLogins: [],
+            reviewerTeamSlugs: [],
+            createdAt: '2023-10-10T01:30:57Z'
+          },
+          now: new Date('2023-10-25T01:30:57Z'),
+          deadline: 6
+        },
+        want: false
+      },
+      {
+        name: 'draft',
+        in: {
+          pr: {
+            url: 'my-url',
+            no: 0,
+            draft: true,
+            reviewerLogins: ['test'],
+            reviewerTeamSlugs: [],
+            createdAt: '2023-10-10T01:30:57Z'
+          },
+          now: new Date('2023-10-25T01:30:57Z'),
+          deadline: 6
+        },
+        want: false
+      },
+      {
+        name: 'deadline',
+        in: {
+          pr: {
+            url: 'my-url',
+            no: 0,
+            draft: false,
+            reviewerLogins: ['test'],
+            reviewerTeamSlugs: [],
+            createdAt: '2023-10-24T01:30:57Z'
+          },
+          now: new Date('2023-10-25T01:30:57Z'),
+          deadline: 6
+        },
+        want: false
+      }
+    ];
+
+    cases.forEach(x => {
+      expect(checkPrState(x.in.pr, { ...x.in })).toBe(x.want);
+    });
+  });
+
   it('toComment', () => {
     const cases: {
       in: { owner: string; pr: PrReviewer };

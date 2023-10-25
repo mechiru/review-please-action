@@ -9,6 +9,9 @@ inputs:
   repo:
     description: Target repository. Format is `owner/repo_name`.
     default: ${{ github.repository }}
+  review-deadline:
+    description: New Pull Request review deadline. The period is expressed in days and has a `d` suffix.
+    default: 6d
 
 outputs:
   prs:
