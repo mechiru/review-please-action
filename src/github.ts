@@ -21,7 +21,7 @@ export class Client {
   };
   private readonly _octokit: MyOctokit;
 
-  public constructor(init: { owner: string; repo: string; auth: string }) {
+  constructor(init: { owner: string; repo: string; auth: string }) {
     this._opt = init;
     this._octokit = new (Octokit.plugin(paginateRest, throttling))({
       auth: init.auth,
@@ -43,7 +43,7 @@ export class Client {
     });
   }
 
-  public async createIssueComment(no: number, body: string) {
+  async createIssueComment(no: number, body: string) {
     await this._octokit.rest.issues.createComment({
       issue_number: no,
       body,
@@ -51,7 +51,7 @@ export class Client {
     });
   }
 
-  public async getPrReviewers(): Promise<PrReviewer[]> {
+  async getPrReviewers(): Promise<PrReviewer[]> {
     const prs = await this._octokit.paginate(`GET /repos/{owner}/{repo}/pulls`, {
       ...this._opt
     });

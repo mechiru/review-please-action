@@ -32,7 +32,7 @@ describe('main.ts', () => {
 
     cases.forEach(x => {
       if (x.error) {
-        expect(() => parsePeriod(x.in)).toThrowError();
+        expect(() => parsePeriod(x.in)).toThrow();
       } else {
         expect(parsePeriod(x.in)).toEqual(x.want);
       }
