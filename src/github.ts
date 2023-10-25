@@ -1,4 +1,4 @@
-import { PaginateInterface, paginateRest } from '@octokit/plugin-paginate-rest';
+import { type PaginateInterface, paginateRest } from '@octokit/plugin-paginate-rest';
 import { throttling } from '@octokit/plugin-throttling';
 import { Octokit } from '@octokit/rest';
 
@@ -43,7 +43,7 @@ export class Client {
     });
   }
 
-  async createIssueComment(no: number, body: string) {
+  async createIssueComment(no: number, body: string): Promise<void> {
     await this._octokit.rest.issues.createComment({
       issue_number: no,
       body,

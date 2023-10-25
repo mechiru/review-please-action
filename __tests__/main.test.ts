@@ -30,13 +30,13 @@ describe('main.ts', () => {
       }
     ];
 
-    cases.forEach(x => {
+    for (const x of cases) {
       if (x.error) {
         expect(() => parsePeriod(x.in)).toThrow();
       } else {
         expect(parsePeriod(x.in)).toEqual(x.want);
       }
-    });
+    }
   });
 
   it('checkPrState', () => {
@@ -131,9 +131,9 @@ describe('main.ts', () => {
       }
     ];
 
-    cases.forEach(x => {
+    for (const x of cases) {
       expect(checkPrState(x.in.pr, { ...x.in })).toBe(x.want);
-    });
+    }
   });
 
   it('toComment', () => {
@@ -215,8 +215,8 @@ Please review!!`
       }
     ];
 
-    cases.forEach(x => {
+    for (const x of cases) {
       expect(toComment(x.in.owner, x.in.pr)).toBe(x.want);
-    });
+    }
   });
 });
