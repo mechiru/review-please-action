@@ -8546,9 +8546,9 @@ class Client {
             no: x.number,
             url: x.url,
             author: x.user?.login,
+            draft: x.draft ?? false,
             reviewerLogins: x.requested_reviewers?.map(x => x.login) ?? [],
             reviewerTeamSlugs: x.requested_teams?.map(x => x.slug) ?? [],
-            // TODO: export create/update time for filter feature.
             createdAt: x.created_at,
             updatedAt: x.updated_at
         }));
@@ -8588,15 +8588,17 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.toComment = exports.run = void 0;
+exports.toComment = exports.checkPrState = exports.parsePeriod = exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github_1 = __nccwpck_require__(978);
 function parseInput(init) {
     const [owner, repo] = core.getInput('repo').split('/');
+    const deadline = parseInt(core.getInput('review-deadline'));
     return {
         auth: core.getInput('github-token'),
         owner,
-        repo
+        repo,
+        deadline
     };
 }
 async function run() {
@@ -8606,6 +8608,9 @@ async function run() {
         const prs = await client.getPrReviewers();
         for (const pr of prs) {
             core.info(`pr: ${JSON.stringify(pr)}`);
+            if (!checkPrState(pr, { now: new Date(), deadline: input.deadline })) {
+                continue;
+            }
             const comment = toComment(input.owner, pr);
             await client.createIssueComment(pr.no, comment);
         }
@@ -8618,6 +8623,32 @@ async function run() {
     }
 }
 exports.run = run;
+function parsePeriod(s) {
+    const match = s.match(/^([0-9]+)d$/);
+    if (match === null || match.length !== 2) {
+        throw new Error(`invalid time period format: ${s}`);
+    }
+    return parseInt(match[0], 10);
+}
+exports.parsePeriod = parsePeriod;
+// Check if the pull request is eligible for comment.
+// If this function returns true, the passed pr is commentable.
+function checkPrState(pr, option) {
+    if (pr.draft) {
+        return false;
+    }
+    if (pr.reviewerLogins.length === 0 && pr.reviewerTeamSlugs.length === 0) {
+        return false;
+    }
+    const createdAt = new Date(pr.createdAt);
+    createdAt.setDate(createdAt.getDate() + option.deadline);
+    core.info(`checkPrState: pr#${pr.no}'s deadline is ${createdAt.toISOString()}`);
+    if (option.now.getTime() < createdAt.getTime()) {
+        return false;
+    }
+    return true;
+}
+exports.checkPrState = checkPrState;
 function toComment(owner, pr) {
     const reviewerLogins = pr.reviewerLogins.map(x => `@${x}`).join(', ');
     const reviewerTeams = pr.reviewerTeamSlugs.map(x => `@${owner}/${x}`).join(', ') ?? '';
