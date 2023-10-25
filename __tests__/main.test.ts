@@ -18,8 +18,10 @@ describe('main.ts', () => {
           pr: {
             url: 'my-url',
             no: 0,
+            draft: false,
             reviewerLogins: [],
-            reviewerTeamSlugs: []
+            reviewerTeamSlugs: [],
+            createdAt: '2023-10-24T01:30:57Z'
           }
         },
         want: `url: my-url
@@ -31,8 +33,10 @@ Please review!!`
           pr: {
             url: 'my-url2',
             no: 123,
+            draft: true,
             reviewerLogins: ['login1'],
-            reviewerTeamSlugs: []
+            reviewerTeamSlugs: [],
+            createdAt: '2023-10-24T01:30:57Z'
           }
         },
         want: `Requested reviewers:
@@ -47,8 +51,10 @@ Please review!!`
           pr: {
             url: 'my-url3',
             no: 123,
+            draft: false,
             reviewerLogins: [],
-            reviewerTeamSlugs: ['team-slug1']
+            reviewerTeamSlugs: ['team-slug1'],
+            createdAt: '2023-10-24T01:30:57Z'
           }
         },
         want: `Requested teams:
@@ -63,8 +69,10 @@ Please review!!`
           pr: {
             url: 'my-url4',
             no: 123,
+            draft: false,
             reviewerLogins: ['login4', 'login5'],
-            reviewerTeamSlugs: ['team-slug1', 'team-slug2']
+            reviewerTeamSlugs: ['team-slug1', 'team-slug2'],
+            createdAt: '2023-10-24T01:30:57Z'
           }
         },
         want: `Requested reviewers:

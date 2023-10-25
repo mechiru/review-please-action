@@ -8,8 +8,10 @@ type MyOctokit = Octokit & { paginate: PaginateInterface };
 export type PrReviewer = {
   no: number;
   url: string;
+  draft: boolean;
   reviewerLogins: string[];
   reviewerTeamSlugs: string[];
+  createdAt: string;
 };
 
 export class Client {
@@ -58,9 +60,9 @@ export class Client {
       no: x.number,
       url: x.url,
       author: x.user?.login,
+      draft: x.draft ?? false,
       reviewerLogins: x.requested_reviewers?.map(x => x.login) ?? [],
       reviewerTeamSlugs: x.requested_teams?.map(x => x.slug) ?? [],
-      // TODO: export create/update time for filter feature.
       createdAt: x.created_at,
       updatedAt: x.updated_at
     }));
