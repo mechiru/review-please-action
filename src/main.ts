@@ -8,7 +8,7 @@ type Input = Readonly<{
   deadline: number;
 }>;
 
-function parseInput(init?: Partial<Input>): Input {
+function parseInput(): Input {
   const [owner, repo] = core.getInput('repo').split('/');
   const deadline = parseInt(core.getInput('review-deadline'));
   return {
